@@ -18,7 +18,7 @@ export class AuthService {
 
   async login(loginDto: LoginDto) {
     const { username, password } = loginDto;
-    
+
     const user = await this.dataSource
       .getRepository(User)
       .createQueryBuilder('user')
@@ -30,17 +30,9 @@ export class AuthService {
       throw new NotFoundException(`No user found for username ${username}`);
     }
 
-    const isPasswordValid = user.password === password;
-    if (!isPasswordValid) {
+    const isValid =( user.password === password) && (user.username === username);
+    if (!isValid) {
       throw new UnauthorizedException('Invalid password');
-    }
-
-    const token = await this.dataSource
-      .getRepository(Auth)
-      .findOne({ where: { employee: { id: user.id } } });
-
-    if (token) {
-      token.accessToken = this.jwtService.sign({ userId: user.id });
     }
 
     const authData = {
@@ -48,9 +40,7 @@ export class AuthService {
       user,
     };
 
-    const result = await this.dataSource
-      .getRepository(Auth)
-      .save(token ? token : authData);
+    const result = await this.dataSource.getRepository(Auth).save(authData);
 
     return {
       accessToken: result.accessToken,
