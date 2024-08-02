@@ -9,6 +9,11 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+export enum UserRole {
+  Admin = 'ADMIN',
+  User = 'USER',
+}
+
 @Entity('User')
 export class User {
   @ApiProperty()
@@ -26,6 +31,13 @@ export class User {
     type: 'varchar',
   })
   nama_cabang: string;
+
+  @ApiProperty()
+  @Column({
+    type: 'enum',
+    enum: UserRole,
+  })
+  role: UserRole;
 
   @ApiProperty()
   @Column({

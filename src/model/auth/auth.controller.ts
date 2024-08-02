@@ -8,7 +8,7 @@ import {
 import { AuthService } from './auth.service';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { LoginDto } from './dto/login.dto';
-import { Auth } from './entities/auth.entity';
+import { LoginResponse } from './constant/auth.constant';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -17,8 +17,14 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  @ApiOkResponse({ type: Auth })
+  @ApiOkResponse({ type: LoginResponse })
   async login(@Body() loginDto: LoginDto) {
     return await this.authService.login(loginDto);
+  }
+
+  @Post('forgot-password')
+  @ApiOkResponse({ type: Boolean })
+  async forgotPassword(@Body() loginDto: LoginDto) {
+    return await this.authService.forgotPassword(loginDto);
   }
 }

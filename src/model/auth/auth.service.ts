@@ -8,6 +8,7 @@ import { DataSource } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
 import { User } from '../user/entities/user.entity';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -30,20 +31,51 @@ export class AuthService {
       throw new NotFoundException(`No user found for username ${username}`);
     }
 
-    const isValid =( user.password === password) && (user.username === username);
-    if (!isValid) {
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    const isValidUsername = username === user.username;
+
+    if (!isValidPassword) {
       throw new UnauthorizedException('Invalid password');
     }
 
-    const authData = {
-      accessToken: this.jwtService.sign({ userId: user.id }),
-      user,
-    };
+    if (!isValidUsername) {
+      throw new UnauthorizedException('Invalid username');
+    }
 
-    const result = await this.dataSource.getRepository(Auth).save(authData);
+    const accessToken = this.jwtService.sign({ id: user.id });
+
+    // const authData = {
+    //   accessToken: this.jwtService.sign({ id: user.id }),
+    //   user,
+    // };
+
+    // const result = await this.dataSource.getRepository(Auth).save(authData);
 
     return {
-      accessToken: result.accessToken,
+      id: user.id,
+      nama_cabang: user.nama_cabang,
+      kode_cabang: user.kode_cabang,
+      role: user.role,
+      accessToken: accessToken,
     };
+  }
+
+  async forgotPassword(forgotPasswordDTO: LoginDto) {
+    const { password, username } = forgotPasswordDTO;
+
+    const userResult = await this.dataSource.getRepository(User).findOne({
+      where: {
+        username,
+      },
+    });
+
+    userResult.password = password;
+
+    const result = await this.dataSource.getRepository(User).save(userResult);
+    if (!result) {
+      return false;
+    }
+
+    return true;
   }
 }

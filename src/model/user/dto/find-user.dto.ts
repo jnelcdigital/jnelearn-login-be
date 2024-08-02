@@ -25,5 +25,5 @@ export class FindUserDto {
   @ApiProperty()
   @IsOptional()
   @IsNumber()
-  limit?: number;
+  size?: number;
 }

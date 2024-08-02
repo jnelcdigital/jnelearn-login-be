@@ -15,7 +15,6 @@ export class ResponseInterceptor implements NestInterceptor {
     return next.handle().pipe(
       map((res: unknown) => this.responseHandler(res, context)),
       catchError((err: HttpException) =>
-        
         throwError(() => this.errorHandler(err, context)),
       ),
     );
@@ -40,7 +39,7 @@ export class ResponseInterceptor implements NestInterceptor {
     const statusCode = response.statusCode;
 
     return {
-      statusCode,
+      statusCode: 200,
       message: 'success',
       data: res,
     };
