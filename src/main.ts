@@ -5,6 +5,7 @@ import { ResponseInterceptor } from './lib/responseInterceptor';
 import { ValidationPipe } from '@nestjs/common';
 
 const port = process.env.PORT
+console.log('port', port)
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
