@@ -37,11 +37,11 @@ export class UserService {
     const take = size ?? 10;
     try {
       const [result, total] = await this.user.findAndCount({
-        where: [
-          { nama_cabang: ILike('%' + nama_cabang + '%') },
-          { kode_cabang: ILike('%' + kode_cabang + '%') },
-          { username: ILike('%' + username + '%') },
-        ],
+        // where: [
+        //   { nama_cabang: ILike('%' + nama_cabang + '%') },
+        //   { kode_cabang: ILike('%' + kode_cabang + '%') },
+        //   { username: ILike('%' + username + '%') },
+        // ],
         skip,
         take,
       });
