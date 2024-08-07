@@ -21,8 +21,8 @@ const config = {
   // prod
   host: 'localhost',
   port: 5432,
-  username: 'jnelearn_user-login',
-  password: 'Jnelcdigital@2023',
+  username: 'jnelearn_user-postgre',
+  password: '&{xVTJNw6R^s',
   database: 'jnelearn_login',
 
   entities: [`${__dirname}/../**/**.entity{.ts,.js}`],
