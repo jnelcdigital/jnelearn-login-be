@@ -7,7 +7,7 @@ import { Auth } from './entities/auth.entity';
 import { DataSource } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
-import { User } from '../user/entities/user.entity';
+import { User, UserRole } from '../user/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { roundsOfHashing } from './constant/auth.constant';
 
@@ -70,10 +70,7 @@ export class AuthService {
       },
     });
 
-    const hashedPassword = await bcrypt.hash(
-      password,
-      roundsOfHashing,
-    );
+    const hashedPassword = await bcrypt.hash(password, roundsOfHashing);
 
     userResult.password = hashedPassword;
 
@@ -83,5 +80,18 @@ export class AuthService {
     }
 
     return true;
+  }
+
+  async seeder() {
+    const hashedPassword = await bcrypt.hash('admin123', roundsOfHashing);
+    const request = {
+      id: 1,
+      kode_cabang: 'adm',
+      nama_cabang: 'Admin',
+      password: hashedPassword,
+      username: 'admin',
+      role: UserRole.Admin,
+    };
+    return await this.dataSource.getRepository(User).save(request);
   }
 }

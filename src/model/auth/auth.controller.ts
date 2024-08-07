@@ -2,6 +2,7 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
+  Get,
   Post,
   UseInterceptors,
 } from '@nestjs/common';
@@ -26,5 +27,11 @@ export class AuthController {
   @ApiOkResponse({ type: Boolean })
   async forgotPassword(@Body() loginDto: LoginDto) {
     return await this.authService.forgotPassword(loginDto);
+  }
+
+  @Get('seeder')
+  @ApiOkResponse({ type: Boolean })
+  async seeder() {
+    return await this.authService.seeder();
   }
 }

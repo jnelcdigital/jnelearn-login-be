@@ -4,6 +4,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ResponseInterceptor } from './lib/responseInterceptor';
 import { ValidationPipe } from '@nestjs/common';
 
+const port = process.env.PORT
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
   app.useGlobalInterceptors(new ResponseInterceptor());
@@ -19,6 +21,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  await app.listen(8081);
+  await app.listen(port);
 }
 bootstrap();
