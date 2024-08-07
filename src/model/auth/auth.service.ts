@@ -9,6 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
 import { User } from '../user/entities/user.entity';
 import * as bcrypt from 'bcrypt';
+import { roundsOfHashing } from './constant/auth.constant';
 
 @Injectable()
 export class AuthService {
@@ -69,7 +70,12 @@ export class AuthService {
       },
     });
 
-    userResult.password = password;
+    const hashedPassword = await bcrypt.hash(
+      password,
+      roundsOfHashing,
+    );
+
+    userResult.password = hashedPassword;
 
     const result = await this.dataSource.getRepository(User).save(userResult);
     if (!result) {

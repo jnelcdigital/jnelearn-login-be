@@ -1,9 +1,15 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { DataSource, ILike, Like } from 'typeorm';
 import { User } from './entities/user.entity';
 import { FindUserDto } from './dto/find-user.dto';
+import * as bcrypt from 'bcrypt';
+import { roundsOfHashing } from '../auth/constant/auth.constant';
 
 @Injectable()
 export class UserService {
@@ -11,6 +17,12 @@ export class UserService {
   private user = this.dataSource.getRepository(User);
 
   async create(createUserDto: CreateUserDto) {
+    const hashedPassword = await bcrypt.hash(
+      createUserDto.password,
+      roundsOfHashing,
+    );
+
+    createUserDto.password = hashedPassword;
     try {
       return await this.user.save(createUserDto);
     } catch (error) {
@@ -19,36 +31,78 @@ export class UserService {
   }
 
   async findAll(findUserDto: FindUserDto) {
-    const { kode_cabang, nama_cabang, username, limit, page } = findUserDto;
-    const skip = ((page ?? 1) -1) * (limit ?? 10)
-    console.log('skip',skip)
-    const take = limit ?? 10
+    const { kode_cabang, nama_cabang, username, size, page } = findUserDto;
+    console.log('dto', findUserDto);
+    const skip = ((page ?? 1) - 1) * (size ?? 10);
+    const take = size ?? 10;
     try {
       const [result, total] = await this.user.findAndCount({
-        where: {
-          nama_cabang: ILike('%' + nama_cabang + '%'),
-          kode_cabang: ILike('%' + kode_cabang + '%'),
-          username: ILike('%' + username + '%'),
-        },
+        where: [
+          { nama_cabang: ILike('%' + nama_cabang + '%') },
+          { kode_cabang: ILike('%' + kode_cabang + '%') },
+          { username: ILike('%' + username + '%') },
+        ],
         skip,
-        take
+        take,
       });
       return { data: result, total };
     } catch (error) {
-      console.log('error', error)
       throw new InternalServerErrorException();
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: number) {
+    try {
+      const user = await this.user.findOne({
+        where: {
+          id,
+        },
+      });
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      return user;
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    if (updateUserDto.password) {
+      updateUserDto.password = await bcrypt.hash(
+        updateUserDto.password,
+        roundsOfHashing,
+      );
+    }
+
+    try {
+      const userResult = await this.user.findOne({ where: { id } });
+      if (!userResult) {
+        throw new NotFoundException('User does not exist');
+      }
+
+      userResult.kode_cabang = updateUserDto.kode_cabang;
+      userResult.nama_cabang = updateUserDto.nama_cabang;
+      userResult.password = updateUserDto.password;
+      userResult.username = updateUserDto.username;
+      userResult.role = updateUserDto.role;
+
+      return await this.user.save(userResult);
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
   }
 
   remove(id: number) {
-    return `This action removes a #${id} user`;
+    try {
+      const result = this.user.delete(id);
+      if (result) {
+        return true;
+      }
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
   }
 }
