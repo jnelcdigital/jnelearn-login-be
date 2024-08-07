@@ -1,8 +1,6 @@
 import { registerAs } from '@nestjs/config';
 import { DataSource, DataSourceOptions } from 'typeorm';
 
-console.log('test',process.env.DATABASE_HOST)
-
 const config = {
   type: 'postgres',
   // host: `${process.env.DATABASE_HOST}`,
