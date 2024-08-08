@@ -32,16 +32,23 @@ export class UserService {
 
   async findAll(findUserDto: FindUserDto) {
     const { kode_cabang, nama_cabang, username, size, page } = findUserDto;
-    console.log('dto', findUserDto);
     const skip = ((page ?? 1) - 1) * (size ?? 10);
     const take = size ?? 10;
+
+    const where = [];
+    if (nama_cabang) {
+      where.push({ nama_cabang: ILike('%' + nama_cabang + '%') ?? '' });
+    } else if (kode_cabang) {
+      where.push({ kode_cabang: ILike('%' + kode_cabang + '%') ?? '' });
+    } else if (username) {
+      where.push({ username: ILike('%' + username + '%') ?? '' });
+    }
+
+    console.log('where',where)
+
     try {
       const [result, total] = await this.user.findAndCount({
-        // where: [
-        //   { nama_cabang: ILike('%' + nama_cabang + '%') },
-        //   { kode_cabang: ILike('%' + kode_cabang + '%') },
-        //   { username: ILike('%' + username + '%') },
-        // ],
+        where,
         skip,
         take,
       });
