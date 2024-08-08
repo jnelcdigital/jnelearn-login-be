@@ -44,8 +44,6 @@ export class UserService {
       where.push({ username: ILike('%' + username + '%') ?? '' });
     }
 
-    console.log('where',where)
-
     try {
       const [result, total] = await this.user.findAndCount({
         where,
