@@ -102,6 +102,11 @@ export class UserService {
 
   remove(id: number) {
     try {
+      const user = this.user.findOne({ where: { id } });
+      if(!user){
+        throw new NotFoundException('User does not exist')
+      }
+      
       const result = this.user.delete(id);
       if (result) {
         return true;
